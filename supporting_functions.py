@@ -1,5 +1,5 @@
 import streamlit as st
-from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
+from youtube_transcript_api import YouTubeTranscriptApi, InvalidVideoId, TranscriptsDisabled, RequestBlocked, IpBlocked
 import time
 import re
 
@@ -46,8 +46,15 @@ def get_transcripts(video_id, language):
         time.sleep(10)
         return transcript
 
+
+    except InvalidVideoId:
+        st.error("Invalid YouTube Video ID, please check the url once again")
     except TranscriptsDisabled:
         st.error("Transcripts are disabled for this video")
+    except RequestBlocked:
+        st.error("Request blocked by YouTube, please try again later")
+    except IpBlocked:
+        st.error("IP Blocked by YouTube, please try again later")
     except Exception as e:
         st.error(f"Error with fetching transcription: {e}")
 

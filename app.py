@@ -20,7 +20,11 @@ st.set_page_config(
     page_icon = "▶️",
     menu_items={
     'Get Help': 'https://www.linkedin.com/in/saiteja-puttoju/',
-    'About': "LinkedIn Profile: https://www.linkedin.com/in/saiteja-puttoju/"
+    'About': """
+    \nLinkedIn Profile: https://www.linkedin.com/in/saiteja-puttoju/
+    \nGitHub Profile: https://github.com/saiteja-puttoju
+    \nHashnode Profile: https://hashnode.com/@saiteja-puttoju
+    """
     }
 )
 
@@ -46,18 +50,22 @@ if page == 'Notes Generator':
                     with st.spinner("Step 1.5/3 : Translating transcripts into English..."):
                         full_transcript = translate_text(full_transcript)
 
+                if full_transcript:
 
-                with st.spinner("Step 2/3 : Fetching key topics..."):
-                    topics = get_important_topics(full_transcript)
-                    st.header("Key Topics: ")
-                    st.info(topics)
+                    with st.spinner("Step 2/3 : Fetching key topics..."):
+                        topics = get_important_topics(full_transcript)
+                        st.header("Key Topics: ")
+                        st.info(topics)
 
-                with st.spinner("Step 3/3 : Generating Notes..."):
-                    notes = generate_notes(full_transcript)
-                    st.header("Notes: ")
-                    st.write(notes)
+                    with st.spinner("Step 3/3 : Generating Notes..."):
+                        notes = generate_notes(full_transcript)
+                        st.header("Notes: ")
+                        st.write(notes)
+                    
+                    st.success("✅ Generated notes successfully!")
                 
-                st.success("✅ Generated notes successfully!")
+                else:
+                    st.info("Error in fetching transcripts, please try again!")
 
         
 elif page == "Chat with Video (v2)":
