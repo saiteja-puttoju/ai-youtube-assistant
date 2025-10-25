@@ -1,5 +1,5 @@
 import streamlit as st
-from youtube_transcript_api import YouTubeTranscriptApi, InvalidVideoId, TranscriptsDisabled, RequestBlocked, IpBlocked
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 import time
 import re
 
@@ -30,33 +30,74 @@ def extract_video_id(url):
         st.error("Error with youtube Video ID extraction, please check the url once again")
         return None
 
+# --- New Transcript Functions Start ---
 
-# function to get transcripts from YouTube video
-def get_transcripts(video_id, language):
+def get_best_transcript(video_id: str) -> tuple[list, str] | tuple[None, str]:
     """
-    Fetches youtube video transcriptions using video url and language code.
+    Fetches the best available transcript (any language).
+    Prioritizes:
+    1. Manual 'en'
+    2. Other Manual
+    3. Generated 'en'
+    4. Other Generated
+
+    Returns:
+        A tuple of (transcript_data, language_code)
+        or (None, error_message) if it fails.
     """
-
-    ytt_api = YouTubeTranscriptApi()
-
+    
+    manual_codes = []
+    generated_codes = []
+    
     try:
-        fetched_transcript = ytt_api.fetch(video_id=video_id, languages=[language])
-        transcript = " ".join([i.text for i in fetched_transcript])
-
-        time.sleep(10)
-        return transcript
-
-
-    except InvalidVideoId:
-        st.error("Invalid YouTube Video ID, please check the url once again")
+        # 1. Create an instance and get the list object
+        ytt_api = YouTubeTranscriptApi()
+        transcript_list = ytt_api.list(video_id=video_id)
+        
+        # 2. Sort all available codes into two lists
+        for transcript in transcript_list:
+            if transcript.is_generated:
+                generated_codes.append(transcript.language_code)
+            else:
+                manual_codes.append(transcript.language_code)
+                
     except TranscriptsDisabled:
-        st.error("Transcripts are disabled for this video")
-    except RequestBlocked:
-        st.error("Request blocked by YouTube, please try again later")
-    except IpBlocked:
-        st.error("IP Blocked by YouTube, please try again later")
+        return None, "Transcripts are disabled for this video."
     except Exception as e:
-        st.error(f"Error with fetching transcription: {e}")
+        return None, f"Error fetching transcript list: {e}"
+
+    # --- 3. Build the Final Prioritized List ---
+    final_priority_list = []
+
+    if 'en' in manual_codes:
+        final_priority_list.append('en')
+        manual_codes.remove('en')
+    
+    final_priority_list.extend(manual_codes)
+
+    if 'en' in generated_codes and 'en' not in final_priority_list:
+        final_priority_list.append('en')
+        generated_codes.remove('en')
+    
+    final_priority_list.extend(generated_codes)
+
+    # --- 4. Fetch the transcript using the list ---
+    if final_priority_list:
+        try:
+            # Find the best transcript object from our priority list
+            transcript_object = transcript_list.find_transcript(final_priority_list)
+            
+            # Fetch the actual data
+            transcript_data = transcript_object.fetch()
+            
+            # Return the data and its language
+            return transcript_data, transcript_object.language_code
+            
+        except Exception as e:
+            return None, f"Could not fetch transcript data: {e}"
+    else:
+        # No transcripts were found at all
+        return None, "No transcripts found for this video."
 
 
 # function to translate text to English
@@ -159,7 +200,7 @@ def generate_notes(transcript):
         Transcript:  
         '''  
         {transcript}  
-        '''      
+        '''  
         """)
 
         chain = prompt | llm
