@@ -6,8 +6,8 @@ VidNote AI is an intelligent web application built with Streamlit that generates
 
 ## 🌟 Key Features
 
-  * **Multi-Language Transcript Fetching:** Uses `youtube-transcript-api` to retrieve video transcripts in their original language (e.g., 'en', 'hi', 'te').
-  * **AI-Powered Translation:** Automatically translates non-English transcripts into English using a specialized Gemini prompt to ensure accurate processing.
+  * **Automatic Transcript Detection:** Automatically finds the best available transcript for a video. The app prioritizes manual 'en', then other manual languages, then generated 'en', ensuring the highest quality source.
+  * **Automatic Translation:** Intelligently checks the language code of the fetched transcript. If it's not English, it automatically translates the text before processing.
   * **Key Topic Extraction:** Analyzes the full transcript to identify and list the five most important topics or concepts discussed in the video.
   * **Structured Note Generation:** Employs a sophisticated LangChain prompt to generate detailed, well-structured notes, complete with emoji-led subheadings and bullet points for easy reading.
   * **Robust URL Parsing:** Includes a function to extract the video ID from various YouTube URL formats (standard, short, embed, etc.).
@@ -87,7 +87,6 @@ Your web browser will automatically open to the application's user interface.
 
 1.  Open the application in your browser.
 2.  On the sidebar, paste the full **YouTube URL** into the text input.
-3.  Enter the **Video Language** code (e.g., `en` for English, `hi` for Hindi).
-4.  Ensure the **"Notes Generator"** page is selected in the sidebar.
-5.  Click the **"Submit"** button.
-6.  The application will display the **Key Topics** and the detailed **Notes** on the main page.
+3.  Ensure the **"Notes Generator"** page is selected in the sidebar.
+4.  Click the **"Submit"** button.
+5.  The application will automatically find the best transcript, translate it if necessary, and display the **Key Topics** and **Notes**.
