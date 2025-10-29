@@ -56,8 +56,8 @@ Follow these instructions to set up and run the project on your local machine.
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/saiteja-puttoju/ai-youtube-summarizer.git
-    cd ai-youtube-summarizer
+    git clone https://github.com/saiteja-puttoju/ai-youtube-assistant.git
+    cd ai-youtube-assistant
     ```
 
 2.  **Create and activate a virtual environment:**
