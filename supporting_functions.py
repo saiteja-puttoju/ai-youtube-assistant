@@ -4,8 +4,12 @@ import time
 import re
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from dotenv import load_dotenv
+
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_chroma import Chroma
 
 load_dotenv()
 
@@ -211,3 +215,62 @@ def generate_notes(transcript):
 
     except Exception as e:
         st.error(f"Error with generating notes: {e}")
+
+
+# function to create chunks from the transcript
+def create_chunks(transcript):
+    """
+    Splits the transcript into smaller chunks for processing.
+    """
+
+    text_spiltter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
+    documents = text_spiltter.create_documents([transcript])
+
+    return documents
+
+# function to create vector store from the chunks
+def create_vector_store(documents):
+    """
+    Creates a vector store from the given documents using Google Generative AI embeddings.
+    """
+
+    embedding = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001", transport="grpc")
+    vector_store = Chroma.from_documents(documents, embedding)
+
+    return vector_store
+
+# function to answer user questions using RAG
+def rag_answer(question, vectorstore):
+    """
+    Answers the user's question based on the context from the vector store.
+    """
+
+    results = vectorstore.similarity_search(question, k=4)
+    context_text = "\n".join([i.page_content for i in results])
+
+    prompt = ChatPromptTemplate.from_template("""
+    You are a kind, polite, and precise assistant. 
+    Your role is to help the user in a warm, respectful, and professional way.
+
+    Guidelines:
+    - Begin with a friendly greeting on the first response (avoid repeating greetings in later turns).
+    - Understand the user’s intent even if there are typos or grammar mistakes.
+    - Answer strictly based on the retrieved context provided below.
+    - If the answer is not in the context, reply with:
+      "I couldn’t find that information in the database. Could you please rephrase or ask something else?"
+    - Keep answers clear, concise, and approachable.
+    - Maintain a helpful and empathetic tone at all times.
+
+    Context:
+    {context}
+
+    User Question:
+    {question}
+
+    Answer:
+    """)
+
+    chain = prompt | llm
+    response = chain.invoke({"context": context_text, "question": question})
+
+    return response.content
