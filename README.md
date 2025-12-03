@@ -1,5 +1,8 @@
 # 🎬 VidNote AI: AI YouTube Summarizer & Chatbot
 
+[![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://ai-youtube-assistant-by-saiteja-puttoju.streamlit.app/)
+[![Read on Hashnode](https://img.shields.io/badge/Hashnode-Read%20Blog%20Post-2962FF?style=for-the-badge&logo=hashnode&logoColor=white)](https://saitejaputtoju.hashnode.dev/how-i-added-a-chat-with-video-rag-system-to-my-ai-app)
+
 VidNote AI is an intelligent web application built with Streamlit that generates concise notes, extracts key topics, and allows you to chat with any YouTube video. It uses the YouTube Transcript API, LangChain, and Google's Gemini AI to create a full-featured RAG (Retrieval-Augmented Generation) pipeline.
 
 
